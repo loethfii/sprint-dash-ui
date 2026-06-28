@@ -10,7 +10,7 @@ export default function LoginCard() {
   };
 
   return (
-    <div className="w-full max-w-[420px] bg-white rounded-[32px] shadow-[0_10px_40px_rgba(0,0,0,0.06)] border border-slate-100 p-8 sm:p-10 flex flex-col items-center">
+    <div className="w-full max-w-105 bg-white rounded-4xl shadow-[0_10px_40px_rgba(0,0,0,0.06)] border border-slate-100 p-8 sm:p-10 flex flex-col items-center">
       {/* Logo & Header */}
       <div className="flex items-center gap-2 mb-6">
         <img src="/assets/logo-bg-removed.png" className="w-20 h-20" alt="logo" />

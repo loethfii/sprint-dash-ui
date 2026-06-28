@@ -15,13 +15,15 @@ export interface Task {
   id: number;
   title: string;
   description: string;
-  status: 'open' | 'working' | 'closed';
+  status: 'open' | 'working' | 'closed' | 'overdue';
   priority: 'high' | 'medium' | 'low' | 'info';
   assignees: Assignee[];
   comments?: number;
   views?: number;
   commentsData?: Comment[];
   subtasks?: Task[];
+  startTime?: string;
+  endTime?: string;
 }
 
 export interface Project {

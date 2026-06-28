@@ -44,6 +44,8 @@ export default function TaskDetailModal({
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
   const [commentsList, setCommentsList] = useState<Comment[]>([]);
   const [newCommentText, setNewCommentText] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
 
   useEffect(() => {
     if (task) {
@@ -57,6 +59,8 @@ export default function TaskDetailModal({
       }
       setSubtasksList(task.subtasks || []);
       setCommentsList(task.commentsData || []);
+      setStartTime(task.startTime || '');
+      setEndTime(task.endTime || '');
     } else {
       setTitle('');
       setDescription('');
@@ -66,6 +70,8 @@ export default function TaskDetailModal({
       setAssigneeAvatar('https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100&auto=format&fit=crop');
       setSubtasksList([]);
       setCommentsList([]);
+      setStartTime('');
+      setEndTime('');
     }
   }, [task, status, isOpen]);
 
@@ -84,6 +90,8 @@ export default function TaskDetailModal({
       comments: commentsList.length,
       commentsData: commentsList,
       views: task ? task.views : Math.floor(Math.random() * 50) + 1,
+      startTime,
+      endTime,
     }, parentId);
   };
 
@@ -233,6 +241,32 @@ export default function TaskDetailModal({
               <span className="text-[11px] font-bold px-2.5 py-1.5 bg-[#20222f] border border-[#2e3146] rounded-lg text-slate-300">
                 Core UI Refactoring
               </span>
+            </div>
+
+            {/* Date Range Selector */}
+            <div className="col-span-1 md:col-span-2 grid grid-cols-2 gap-4 border-t border-[#222535] pt-4 mt-2">
+              <div className="flex flex-col gap-1.5 text-xs">
+                <span className="text-slate-500 flex items-center gap-1.5 font-medium">
+                  <Calendar className="w-3.5 h-3.5 text-blue-400" /> Start Date
+                </span>
+                <input 
+                  type="date"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  className="bg-[#151720] border border-[#222535] rounded-lg px-2.5 py-1.5 text-slate-300 text-[11px] font-semibold outline-none cursor-pointer focus:border-indigo-500/50"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5 text-xs">
+                <span className="text-slate-500 flex items-center gap-1.5 font-medium">
+                  <Calendar className="w-3.5 h-3.5 text-rose-400" /> Due Date (End)
+                </span>
+                <input 
+                  type="date"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  className="bg-[#151720] border border-[#222535] rounded-lg px-2.5 py-1.5 text-slate-300 text-[11px] font-semibold outline-none cursor-pointer focus:border-indigo-500/50"
+                />
+              </div>
             </div>
           </div>
 

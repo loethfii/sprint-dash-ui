@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { 
-  ChevronRight, 
-  ChevronDown, 
-  MessageSquare, 
-  Eye, 
-  Plus, 
+import {
+  ChevronRight,
+  ChevronDown,
+  MessageSquare,
+  Eye,
+  Plus,
   CheckSquare,
-  MoreHorizontal
+  MoreHorizontal,
+  Calendar
 } from 'lucide-react';
 import type { Task } from '../types';
 
@@ -20,24 +21,26 @@ interface TaskTreeColumnProps {
   isDarkMode?: boolean;
 }
 
-export default function TaskTreeColumn({ 
-  title, 
-  status, 
-  tasks, 
-  onSelectTask, 
-  onAddTask, 
+export default function TaskTreeColumn({
+  title,
+  status,
+  tasks,
+  onSelectTask,
+  onAddTask,
   onToggleStatus
 }: TaskTreeColumnProps) {
   const columnColorClass = {
     open: 'bg-[#5f3afc] border-[#5f3afc]',
     working: 'bg-[#ff9f1c] border-[#ff9f1c]',
     closed: 'bg-[#2ec4b6] border-[#2ec4b6]',
+    overdue: 'bg-[#ff6b6b] border-[#ff6b6b]',
   }[status] || 'bg-slate-600 border-slate-600';
 
   const badgeColorClass = {
     open: 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20',
     working: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
     closed: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+    overdue: 'bg-rose-500/10 text-rose-400 border border-rose-500/20',
   }[status] || 'bg-slate-500/10 text-slate-400 border border-slate-500/20';
 
   return (
@@ -52,7 +55,7 @@ export default function TaskTreeColumn({
           </span>
         </div>
         <div className="flex items-center gap-1">
-          <button 
+          <button
             onClick={() => onAddTask(status, null)}
             className="p-1.5 rounded-lg transition-colors cursor-pointer hover:bg-slate-100 dark:hover:bg-[#1a1c2a] text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200"
             title="Add task"
@@ -70,7 +73,7 @@ export default function TaskTreeColumn({
         {tasks.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-8 text-center border-slate-200 dark:border-[#1f2130]/50">
             <span className="text-xs font-medium text-slate-400 dark:text-slate-600">No tasks in this status</span>
-            <button 
+            <button
               onClick={() => onAddTask(status, null)}
               className="mt-2 text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold"
             >
@@ -79,10 +82,10 @@ export default function TaskTreeColumn({
           </div>
         ) : (
           tasks.map(task => (
-            <TreeNode 
-              key={task.id} 
-              node={task} 
-              level={0} 
+            <TreeNode
+              key={task.id}
+              node={task}
+              level={0}
               onSelectTask={onSelectTask}
               onAddTask={onAddTask}
               onToggleStatus={onToggleStatus}
@@ -119,17 +122,34 @@ function TreeNode({ node, level, onSelectTask, onAddTask, onToggleStatus }: Tree
     return priority.charAt(0).toUpperCase() + priority.slice(1);
   };
 
+  const formatDateRange = (start?: string, end?: string) => {
+    if (!start && !end) return null;
+    const formatDate = (dateStr?: string) => {
+      if (!dateStr) return '';
+      try {
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return dateStr;
+        return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+      } catch (e) {
+        return dateStr;
+      }
+    };
+    if (start && end) return `${formatDate(start)} - ${formatDate(end)}`;
+    if (start) return `Start: ${formatDate(start)}`;
+    return `Due: ${formatDate(end)}`;
+  };
+
   return (
     <div className="flex flex-col">
       {/* Node Card */}
-      <div 
+      <div
         onClick={() => onSelectTask(node)}
         style={{ paddingLeft: `${level * 16 + 12}px` }}
         className="group relative border rounded-xl p-3.5 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md flex flex-col gap-3 bg-white dark:bg-[#151720]/80 hover:bg-slate-50 dark:hover:bg-[#1a1d29] border-slate-200 dark:border-[#222535] hover:border-indigo-500/30"
       >
         {/* Connection Line Indicator */}
         {level > 0 && (
-          <div 
+          <div
             className="absolute left-3 top-0 bottom-6 border-l border-slate-200 dark:border-[#2e3146]"
             style={{ left: `${(level - 1) * 16 + 20}px` }}
           ></div>
@@ -139,7 +159,7 @@ function TreeNode({ node, level, onSelectTask, onAddTask, onToggleStatus }: Tree
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5 min-w-0">
             {hasChildren && (
-              <button 
+              <button
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsExpanded(!isExpanded);
@@ -182,6 +202,12 @@ function TreeNode({ node, level, onSelectTask, onAddTask, onToggleStatus }: Tree
               {node.description}
             </p>
           )}
+          {formatDateRange(node.startTime, node.endTime) && (
+            <div className="flex items-center gap-1.5 text-[9px] text-slate-400 dark:text-slate-500 mt-1 font-medium bg-slate-100 dark:bg-slate-800/40 px-1.5 py-0.5 rounded w-fit">
+              <Calendar className="w-2.5 h-2.5 text-indigo-400" />
+              <span>{formatDateRange(node.startTime, node.endTime)}</span>
+            </div>
+          )}
         </div>
 
         {/* Footer (Assignee & Stats) */}
@@ -189,9 +215,9 @@ function TreeNode({ node, level, onSelectTask, onAddTask, onToggleStatus }: Tree
           <div className="flex items-center -space-x-1.5 overflow-hidden">
             {node.assignees && node.assignees.length > 0 ? (
               node.assignees.map((assignee, idx) => (
-                <img 
+                <img
                   key={idx}
-                  src={assignee.avatar} 
+                  src={assignee.avatar}
                   alt={assignee.name}
                   className="w-5.5 h-5.5 rounded-full object-cover border border-white dark:border-[#151720]"
                   title={assignee.name}
@@ -231,10 +257,10 @@ function TreeNode({ node, level, onSelectTask, onAddTask, onToggleStatus }: Tree
       {hasChildren && isExpanded && (
         <div className="mt-2 flex flex-col gap-2">
           {node.subtasks?.map(child => (
-            <TreeNode 
-              key={child.id} 
-              node={child} 
-              level={level + 1} 
+            <TreeNode
+              key={child.id}
+              node={child}
+              level={level + 1}
               onSelectTask={onSelectTask}
               onAddTask={onAddTask}
               onToggleStatus={onToggleStatus}

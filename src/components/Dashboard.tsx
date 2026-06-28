@@ -17,6 +17,8 @@ const initialTasks: Task[] = [
     ],
     comments: 11,
     views: 187,
+    startTime: "2026-06-01",
+    endTime: "2026-06-15",
     commentsData: [
       { id: 1, author: "Lia Martinez", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100&auto=format&fit=crop", text: "Looking very solid, especially the glass effect!", time: "2 hours ago" }
     ],
@@ -32,6 +34,8 @@ const initialTasks: Task[] = [
         ],
         comments: 4,
         views: 32,
+        startTime: "2026-06-02",
+        endTime: "2026-06-10",
         subtasks: []
       },
       {
@@ -45,6 +49,23 @@ const initialTasks: Task[] = [
         ],
         comments: 1,
         views: 14,
+        startTime: "2026-06-01",
+        endTime: "2026-06-03",
+        subtasks: []
+      },
+      {
+        id: 4,
+        title: "Define global tailwind dark mode colors",
+        description: "Specify semantic background colors like #090a0f, #0d0e12 and borders #1f212a.",
+        status: "closed",
+        priority: "info",
+        assignees: [
+          { name: "Ronaldo S.", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=100&auto=format&fit=crop" }
+        ],
+        comments: 1,
+        views: 14,
+        startTime: "2026-06-01",
+        endTime: "2026-06-03",
         subtasks: []
       }
     ]
@@ -60,6 +81,8 @@ const initialTasks: Task[] = [
     ],
     comments: 0,
     views: 8,
+    startTime: "2026-06-10",
+    endTime: "2026-06-25",
     subtasks: [
       {
         id: 5,
@@ -68,6 +91,8 @@ const initialTasks: Task[] = [
         status: "open",
         priority: "medium",
         assignees: [],
+        startTime: "2026-06-12",
+        endTime: "2026-06-18",
         subtasks: []
       }
     ]
@@ -84,6 +109,24 @@ const initialTasks: Task[] = [
     ],
     comments: 24,
     views: 912,
+    startTime: "2026-06-20",
+    endTime: "2026-06-28",
+    subtasks: []
+  },
+  {
+    id: 7,
+    title: "Client Beta Release Package",
+    description: "Compile and bundle release packages, coordinate with QA, and deploy preview environments.",
+    status: "overdue",
+    priority: "low",
+    assignees: [
+      { name: "Azunyan U. Wu", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100&auto=format&fit=crop" },
+      { name: "Lia Martinez", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100&auto=format&fit=crop" }
+    ],
+    comments: 24,
+    views: 912,
+    startTime: "2026-06-20",
+    endTime: "2026-06-28",
     subtasks: []
   }
 ];
@@ -255,6 +298,14 @@ export default function Dashboard() {
                 title="Closed"
                 status="closed"
                 tasks={getTasksByStatus('closed')}
+                onSelectTask={handleEditTaskClick}
+                onAddTask={handleAddTaskClick}
+                onToggleStatus={handleToggleStatus}
+              />
+              <TaskTreeColumn
+                title="Overdue"
+                status="overdue"
+                tasks={getTasksByStatus('overdue')}
                 onSelectTask={handleEditTaskClick}
                 onAddTask={handleAddTaskClick}
                 onToggleStatus={handleToggleStatus}
