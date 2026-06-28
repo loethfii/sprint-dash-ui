@@ -1,3 +1,7 @@
+---
+import "../styles/global.css";
+---
+
 <!doctype html>
 <html lang="en">
 	<head>
@@ -6,9 +10,28 @@
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
+
+		<!-- Immediate Theme Initializer Script -->
+		<script is:inline>
+			(function () {
+				var t = localStorage.getItem('sprint-dash-theme');
+				var isLight = t === 'light';
+				if (isLight) {
+					document.documentElement.classList.remove('dark');
+					document.documentElement.setAttribute('data-theme', 'light');
+					document.documentElement.style.backgroundColor = '#f4f6f9';
+				} else {
+					document.documentElement.classList.add('dark');
+					document.documentElement.setAttribute('data-theme', 'dark');
+					document.documentElement.style.backgroundColor = '#090a0f';
+				}
+				document.documentElement.style.colorScheme = isLight ? 'light' : 'dark';
+			})();
+		</script>
+
+		<title>Sprint Dash - Kanban Workspace</title>
 	</head>
-	<body>
+	<body class="bg-[#f4f6f9] dark:bg-[#090a0f] text-slate-800 dark:text-slate-100 font-sans antialiased">
 		<slot />
 	</body>
 </html>
@@ -19,5 +42,6 @@
 		margin: 0;
 		width: 100%;
 		height: 100%;
+		overflow: hidden;
 	}
 </style>
