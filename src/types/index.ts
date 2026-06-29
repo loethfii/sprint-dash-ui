@@ -27,11 +27,16 @@ export interface Task {
 }
 
 export interface Project {
-  id: number;
+  id: string | number;
   name: string;
-  description: string;
+  description: string | null;
   scope: string;
   tasksCount: number;
+  projectName?: string;
+  scopeCategory?: string;
+  startDate?: string;
+  endDate?: string;
+  priority?: string;
 }
 
 export interface Member {

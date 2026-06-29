@@ -1,15 +1,33 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Edit3, FolderKanban, CheckSquare, Layers } from 'lucide-react';
-
+import { Plus, Trash2, Edit3, FolderKanban, CheckSquare, Layers, Calendar } from 'lucide-react';
 import type { Project } from '../types';
+import ConfirmDeleteModal from './ConfirmDeleteModal';
+import moment from 'moment-timezone';
 
 interface ProjectsViewProps {
   isDarkMode: boolean;
   projects: Project[];
   onCreateProject: (project: Project) => void;
-  onUpdateProject: (id: number, fields: Partial<Project>) => void;
-  onDeleteProject: (id: number) => void;
+  onUpdateProject: (id: string | number, fields: Partial<Project>) => void;
+  onDeleteProject: (id: string | number) => void;
 }
+
+const getTodayStr = () => new Date().toISOString().split('T')[0];
+const getFutureStr = () => {
+  const d = new Date();
+  d.setFullYear(d.getFullYear() + 1);
+  return d.toISOString().split('T')[0];
+};
+
+const normalizeScope = (val: string) => {
+  if (!val) return 'Frontend';
+  const lower = val.toLowerCase();
+  if (lower === 'frontend' || lower === 'frontent') return 'Frontend';
+  if (lower === 'backend') return 'Backend';
+  if (lower === 'database') return 'Database';
+  if (lower === 'infrastructure') return 'Infrastructure';
+  return 'Frontend';
+};
 
 export default function ProjectsView({
   isDarkMode,
@@ -19,10 +37,14 @@ export default function ProjectsView({
   onDeleteProject
 }: ProjectsViewProps) {
   const [isAdding, setIsAdding] = useState(false);
-  const [isEditing, setIsEditing] = useState<number | null>(null); // holds project ID being edited
+  const [isEditing, setIsEditing] = useState<string | number | null>(null); // holds project ID being edited
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [scope, setScope] = useState('Core UI Refactoring');
+  const [scope, setScope] = useState('Frontend');
+  const [startDate, setStartDate] = useState(getTodayStr());
+  const [endDate, setEndDate] = useState(getFutureStr());
+  const [priority, setPriority] = useState('medium');
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
 
   const handleSubmitAdd = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,32 +54,48 @@ export default function ProjectsView({
       name,
       description,
       scope,
-      tasksCount: 0
+      tasksCount: 0,
+      startDate,
+      endDate,
+      priority
     });
     setName('');
     setDescription('');
-    setScope('Core UI Refactoring');
+    setScope('Frontend');
+    setStartDate(getTodayStr());
+    setEndDate(getFutureStr());
+    setPriority('medium');
     setIsAdding(false);
   };
 
   const handleStartEdit = (project: Project) => {
     setIsEditing(project.id);
     setName(project.name);
-    setDescription(project.description);
-    setScope(project.scope || 'Core UI Refactoring');
+    setDescription(project.description || '');
+    setScope(normalizeScope(project.scope));
+    setStartDate(project.startDate || getTodayStr());
+    setEndDate(project.endDate || getFutureStr());
+    setPriority(project.priority || 'medium');
   };
 
-  const handleSubmitEdit = (e: React.FormEvent, id: number) => {
+  const handleSubmitEdit = (e: React.FormEvent, id: string | number) => {
     e.preventDefault();
     if (!name.trim()) return;
     onUpdateProject(id, {
       name,
       description,
-      scope
+      scope,
+      startDate,
+      endDate,
+      priority
     });
     setIsEditing(null);
     setName('');
     setDescription('');
+    setScope('Frontend');
+    setStartDate(getTodayStr());
+    setEndDate(getFutureStr());
+    setPriority('medium');
   };
 
   return (
@@ -101,18 +139,54 @@ export default function ProjectsView({
               rows={3}
               className="w-full border rounded-xl px-4 py-2.5 text-xs outline-none transition-colors bg-slate-50 dark:bg-[#151720] border-slate-200 dark:border-[#222535] text-slate-800 dark:text-white focus:border-indigo-500/50"
             />
-            <div className="flex items-center justify-between text-xs pt-1">
-              <span className="text-slate-500 font-medium">Scope Category</span>
-              <select
-                value={scope}
-                onChange={(e) => setScope(e.target.value)}
-                className="border rounded-lg px-2.5 py-1.5 text-[11px] font-semibold outline-none cursor-pointer bg-slate-50 dark:bg-[#151720] border-slate-200 dark:border-[#222535] text-slate-600 dark:text-slate-300"
-              >
-                <option value="Frontend">Frontend</option>
-                <option value="Backend">Backend</option>
-                <option value="Database">Database</option>
-                <option value="Infrastructure">Infrastructure</option>
-              </select>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs pt-1">
+              <div className="flex flex-col gap-1 col-span-2 sm:col-span-1">
+                <span className="text-slate-500 font-medium">Scope Category</span>
+                <select
+                  value={scope}
+                  onChange={(e) => setScope(e.target.value)}
+                  className="border rounded-lg px-2.5 py-1.5 text-[11px] font-semibold outline-none cursor-pointer bg-slate-50 dark:bg-[#151720] border-slate-200 dark:border-[#222535] text-slate-600 dark:text-slate-300"
+                >
+                  <option value="Frontend">Frontend</option>
+                  <option value="Backend">Backend</option>
+                  <option value="Database">Database</option>
+                  <option value="Infrastructure">Infrastructure</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <span className="text-slate-500 font-medium">Priority</span>
+                <select
+                  value={priority}
+                  onChange={(e) => setPriority(e.target.value)}
+                  className="border rounded-lg px-2.5 py-1.5 text-[11px] font-semibold outline-none cursor-pointer bg-slate-50 dark:bg-[#151720] border-slate-200 dark:border-[#222535] text-slate-600 dark:text-slate-300 animate-fade-in"
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <span className="text-slate-500 font-medium">Start Date</span>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="border rounded-lg px-2 py-1 text-[11px] font-semibold outline-none cursor-pointer bg-slate-50 dark:bg-[#151720] border-slate-200 dark:border-[#222535] text-slate-600 dark:text-slate-300"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <span className="text-slate-500 font-medium">End Date</span>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="border rounded-lg px-2 py-1 text-[11px] font-semibold outline-none cursor-pointer bg-slate-50 dark:bg-[#151720] border-slate-200 dark:border-[#222535] text-slate-600 dark:text-slate-300"
+                />
+              </div>
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-2">
@@ -154,6 +228,56 @@ export default function ProjectsView({
                     rows={2}
                     className="w-full border rounded-xl px-3 py-2 text-xs outline-none bg-slate-50 dark:bg-[#151720] border-slate-200 dark:border-[#222535] text-slate-800 dark:text-white focus:border-indigo-500/50"
                   />
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs pt-1">
+                    <div className="flex flex-col gap-1 col-span-2 sm:col-span-1">
+                      <span className="text-[10px] text-slate-500 font-medium">Scope</span>
+                      <select
+                        value={scope}
+                        onChange={(e) => setScope(e.target.value)}
+                        className="w-full border rounded-lg px-2 py-1 text-[11px] font-semibold outline-none bg-slate-50 dark:bg-[#151720] border-slate-200 dark:border-[#222535] text-slate-800 dark:text-white focus:border-indigo-500/50"
+                      >
+                        <option value="Frontend">Frontend</option>
+                        <option value="Backend">Backend</option>
+                        <option value="Database">Database</option>
+                        <option value="Infrastructure">Infrastructure</option>
+                      </select>
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-500 font-medium">Priority</span>
+                      <select
+                        value={priority}
+                        onChange={(e) => setPriority(e.target.value)}
+                        className="w-full border rounded-lg px-2 py-1 text-[11px] font-semibold outline-none bg-slate-50 dark:bg-[#151720] border-slate-200 dark:border-[#222535] text-slate-800 dark:text-white focus:border-indigo-500/50"
+                      >
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                      </select>
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-500 font-medium">Start</span>
+                      <input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        className="w-full border rounded-lg px-2 py-0.5 text-[11px] font-semibold outline-none bg-slate-50 dark:bg-[#151720] border-slate-200 dark:border-[#222535] text-slate-800 dark:text-white focus:border-indigo-500/50"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-500 font-medium">End</span>
+                      <input
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        className="w-full border rounded-lg px-2 py-0.5 text-[11px] font-semibold outline-none bg-slate-50 dark:bg-[#151720] border-slate-200 dark:border-[#222535] text-slate-800 dark:text-white focus:border-indigo-500/50"
+                      />
+                    </div>
+                  </div>
+
                   <div className="flex justify-end gap-2 text-xs pt-1">
                     <button
                       type="button"
@@ -171,9 +295,9 @@ export default function ProjectsView({
                   </div>
                 </form>
               ) : (
-                <div className="p-5 rounded-2xl border flex flex-col justify-between h-48 transition-all bg-white dark:bg-[#0f111a] border-slate-200 dark:border-[#1f2130] shadow-xs">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
+                <div className="p-5 rounded-2xl border flex flex-col justify-between min-h-[220px] transition-all bg-white dark:bg-[#0f111a] border-slate-200 dark:border-[#1f2130] shadow-xs">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <div className="p-1.5 bg-indigo-500/10 rounded-lg text-indigo-400">
                           <FolderKanban className="w-4.5 h-4.5" />
@@ -190,18 +314,34 @@ export default function ProjectsView({
                           <Edit3 className="w-4.5 h-4.5" />
                         </button>
                         <button
-                          onClick={() => onDeleteProject(project.id)}
+                          onClick={() => setProjectToDelete(project)}
                           className="p-1 hover:bg-slate-100 dark:hover:bg-rose-500/10 text-slate-500 hover:text-rose-400 rounded-lg transition-colors cursor-pointer"
                         >
                           <Trash2 className="w-4.5 h-4.5" />
                         </button>
                       </div>
                     </div>
-                    <h3 className="text-sm font-bold truncate text-slate-800 dark:text-white">{project.name}</h3>
-                    <p className="text-[11px] text-slate-500 mt-1 line-clamp-2 leading-relaxed">{project.description}</p>
+                    <div>
+                      <h3 className="text-sm font-bold truncate text-slate-800 dark:text-white">{project.name}</h3>
+                      <p className="text-[11px] text-slate-500 mt-1 line-clamp-2 leading-relaxed">{project.description}</p>
+                    </div>
+
+                    {/* Timeline & Priority Badges */}
+                    <div className="flex items-center justify-between pt-1 text-[10px] text-slate-400 dark:text-slate-500 font-medium">
+                      <span className="flex items-center gap-1 text-[10px]">
+                        <Calendar className="w-3.5 h-3.5 text-indigo-400" />
+                        {project.startDate && project.endDate ? `${moment(project.startDate).format('DD-MM-YYYY')} to ${moment(project.endDate).format('DD-MM-YYYY')} ` : 'No timeline'}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${project.priority === 'high' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' :
+                        project.priority === 'medium' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
+                          'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                        }`}>
+                        {project.priority || 'medium'}
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="flex items-center justify-between border-t dark:border-[#1f2130] border-slate-100 pt-3">
+                  <div className="flex items-center justify-between border-t dark:border-[#1f2130] border-slate-100 pt-3 mt-3">
                     <span className="text-[10px] text-slate-500 flex items-center gap-1">
                       <CheckSquare className="w-3.5 h-3.5" /> {project.tasksCount} Tasks Registered
                     </span>
@@ -216,6 +356,17 @@ export default function ProjectsView({
         })}
       </div>
 
+      <ConfirmDeleteModal
+        isOpen={projectToDelete !== null}
+        onClose={() => setProjectToDelete(null)}
+        onConfirm={() => {
+          if (projectToDelete) {
+            onDeleteProject(projectToDelete.id);
+          }
+        }}
+        title="Delete Project"
+        message={`Are you sure you want to delete project "${projectToDelete?.name}"? This action cannot be undone.`}
+      />
     </div>
   );
 }

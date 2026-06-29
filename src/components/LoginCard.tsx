@@ -25,19 +25,16 @@ export default function LoginCard() {
   return (
     <div className="w-full max-w-105 bg-white rounded-4xl shadow-[0_10px_40px_rgba(0,0,0,0.06)] border border-slate-100 p-8 sm:p-10 flex flex-col items-center">
       {/* Logo & Header */}
-      <div className="flex items-center gap-2 mb-6">
+      <div className="flex items-center">
         <img src="/assets/logo-bg-removed.png" className="w-20 h-20" alt="logo" />
-        <span className="text-xl sm:text-2xl font-bold text-[#1e293b] tracking-tight">
-          Sprint Dash
-        </span>
       </div>
 
       {/* Greetings */}
       <h1 className="text-2xl sm:text-[28px] font-bold text-[#111827] text-center mb-1">
-        Selamat Datang
+        Welcome
       </h1>
       <p className="text-sm text-slate-500 text-center mb-8">
-        Masuk ke Sprint Dash Anda
+        Login to Sprint Dash
       </p>
 
       {/* Form */}
@@ -66,7 +63,7 @@ export default function LoginCard() {
             </svg>
             <input
               type="text"
-              placeholder="Email atau Nama Pengguna"
+              placeholder="Email or Username"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="bg-transparent border-none outline-none w-full text-sm text-slate-800 placeholder-slate-400"
@@ -94,7 +91,7 @@ export default function LoginCard() {
             </svg>
             <input
               type="password"
-              placeholder="Kata Sandi"
+              placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="bg-transparent border-none outline-none w-full text-sm text-slate-800 placeholder-slate-400"
@@ -115,7 +112,15 @@ export default function LoginCard() {
           disabled={isLoading}
           className="w-full bg-[#3d3ff3] hover:bg-[#2c2ed6] disabled:bg-slate-400 active:scale-[0.98] text-white text-sm font-semibold py-3.5 rounded-xl shadow-md shadow-indigo-600/10 transition-all duration-200 mt-2 cursor-pointer flex items-center justify-center"
         >
-          {isLoading ? 'Sedang masuk...' : 'Masuk'}
+          {isLoading ? (
+            <div className="flex items-center gap-2">
+              <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>Processing...</span>
+            </div>
+          ) : 'Login'}
         </button>
       </form>
 

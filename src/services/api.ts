@@ -1,3 +1,5 @@
+import type { Project } from '../types';
+
 const API_BASE_URL = import.meta.env.BASE_URL_SPRINT_DASH_API;
 const API_BASE = `${API_BASE_URL}/api/v1`;
 
@@ -145,4 +147,176 @@ export function logoutUser() {
   if (typeof window !== 'undefined') {
     window.location.href = '/login';
   }
+}
+
+export interface Pagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface ApiResponse<T> {
+  data: T;
+  timestamp: string;
+  pagination?: Pagination;
+}
+
+export interface ProjectPayload {
+  projectName: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  priority: string;
+  scopeCategory: string;
+}
+
+const mapScopeToFrontend = (val: string): string => {
+  if (!val) return 'Frontend';
+  const v = val.toLowerCase();
+  if (v === 'frontend' || v === 'frontent') return 'Frontend';
+  if (v === 'backend') return 'Backend';
+  if (v === 'database') return 'Database';
+  if (v === 'infrastructure') return 'Infrastructure';
+  return 'Frontend';
+};
+
+const mapScopeToBackend = (val: string): string => {
+  if (!val) return 'FRONTENT';
+  const v = val.toLowerCase();
+  if (v === 'frontend' || v === 'frontent') return 'FRONTENT';
+  if (v === 'backend') return 'BACKEND';
+  if (v === 'database') return 'DATABASE';
+  if (v === 'infrastructure') return 'Infrastructure';
+  return 'FRONTENT';
+};
+
+export async function fetchProjects(page = 1, limit = 10): Promise<ApiResponse<Project[]>> {
+  const token = cookies.get('accessToken');
+  const response = await fetch(`${API_BASE}/projects?page=${page}&limit=${limit}`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch projects');
+  }
+
+  const result = await response.json();
+  if (result.data && Array.isArray(result.data)) {
+    result.data = result.data.map((p: any) => ({
+      ...p,
+      name: p.projectName || p.name || '',
+      scope: mapScopeToFrontend(p.scopeCategory || p.scope),
+      tasksCount: p.tasksCount || 0
+    }));
+  }
+  return result;
+}
+
+export async function fetchProjectById(id: string | number): Promise<ApiResponse<Project>> {
+  const token = cookies.get('accessToken');
+  const response = await fetch(`${API_BASE}/projects/${id}`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch project');
+  }
+
+  const result = await response.json();
+  if (result.data) {
+    result.data = {
+      ...result.data,
+      name: result.data.projectName || result.data.name || '',
+      scope: mapScopeToFrontend(result.data.scopeCategory || result.data.scope),
+      tasksCount: result.data.tasksCount || 0
+    };
+  }
+  return result;
+}
+
+export async function createProject(payload: ProjectPayload): Promise<ApiResponse<Project>> {
+  const token = cookies.get('accessToken');
+  const mappedPayload = {
+    ...payload,
+    scopeCategory: mapScopeToBackend(payload.scopeCategory)
+  };
+  const response = await fetch(`${API_BASE}/projects`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(mappedPayload),
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData?.message || 'Failed to create project');
+  }
+
+  const result = await response.json();
+  if (result.data) {
+    result.data = {
+      ...result.data,
+      name: result.data.projectName || result.data.name || '',
+      scope: mapScopeToFrontend(result.data.scopeCategory || result.data.scope),
+      tasksCount: result.data.tasksCount || 0
+    };
+  }
+  return result;
+}
+
+export async function updateProject(id: string | number, payload: ProjectPayload): Promise<ApiResponse<Project>> {
+  const token = cookies.get('accessToken');
+  const mappedPayload = {
+    ...payload,
+    scopeCategory: mapScopeToBackend(payload.scopeCategory)
+  };
+  const response = await fetch(`${API_BASE}/projects/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(mappedPayload),
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData?.message || 'Failed to update project');
+  }
+
+  const result = await response.json();
+  if (result.data) {
+    result.data = {
+      ...result.data,
+      name: result.data.projectName || result.data.name || '',
+      scope: mapScopeToFrontend(result.data.scopeCategory || result.data.scope),
+      tasksCount: result.data.tasksCount || 0
+    };
+  }
+  return result;
+}
+
+export async function deleteProject(id: string | number): Promise<ApiResponse<{ message: string }>> {
+  const token = cookies.get('accessToken');
+  const response = await fetch(`${API_BASE}/projects/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to delete project');
+  }
+
+  return response.json();
 }

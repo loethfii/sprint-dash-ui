@@ -19,6 +19,7 @@
     "@types/react-dom": "^19.2.3",
     "astro": "^7.0.3",
     "lucide-react": "^1.21.0",
+    "moment-timezone": "^0.6.2",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "tailwindcss": "^4.3.1"
