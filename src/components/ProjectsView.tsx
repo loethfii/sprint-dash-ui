@@ -11,12 +11,12 @@ interface ProjectsViewProps {
   onDeleteProject: (id: number) => void;
 }
 
-export default function ProjectsView({ 
-  isDarkMode, 
-  projects, 
-  onCreateProject, 
-  onUpdateProject, 
-  onDeleteProject 
+export default function ProjectsView({
+  isDarkMode,
+  projects,
+  onCreateProject,
+  onUpdateProject,
+  onDeleteProject
 }: ProjectsViewProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState<number | null>(null); // holds project ID being edited
@@ -62,7 +62,7 @@ export default function ProjectsView({
 
   return (
     <div className="flex-1 p-8 overflow-y-auto custom-scrollbar space-y-6">
-      
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -108,9 +108,10 @@ export default function ProjectsView({
                 onChange={(e) => setScope(e.target.value)}
                 className="border rounded-lg px-2.5 py-1.5 text-[11px] font-semibold outline-none cursor-pointer bg-slate-50 dark:bg-[#151720] border-slate-200 dark:border-[#222535] text-slate-600 dark:text-slate-300"
               >
-                <option value="Core UI Refactoring">Core UI Refactoring</option>
-                <option value="Security BFF Integrations">Security BFF Integrations</option>
-                <option value="Database Analytics">Database Analytics</option>
+                <option value="Frontend">Frontend</option>
+                <option value="Backend">Backend</option>
+                <option value="Database">Database</option>
+                <option value="Infrastructure">Infrastructure</option>
               </select>
             </div>
           </div>

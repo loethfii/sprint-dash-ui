@@ -1,12 +1,25 @@
 import React, { useState } from 'react';
+import { loginUser } from '../services/api';
 
 export default function LoginCard() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('Login attempt with:', { email, password });
+    setIsLoading(true);
+    setError('');
+    try {
+      await loginUser(email, password);
+      // Success: redirect to dashboard
+      window.location.href = '/';
+    } catch (err: any) {
+      setError(err.message || 'Surel atau kata sandi tidak valid.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -29,6 +42,11 @@ export default function LoginCard() {
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
+        {error && (
+          <div className="bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 text-rose-600 dark:text-rose-400 text-xs rounded-xl px-4 py-3 font-medium">
+            {error}
+          </div>
+        )}
         {/* Username/Email Input */}
         <div className="flex flex-col">
           <div className="flex items-center gap-3 bg-[#f5f6fa] border border-slate-200/60 rounded-xl px-4 py-3.5 focus-within:bg-white focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/10 transition-all duration-200">
@@ -94,21 +112,16 @@ export default function LoginCard() {
         {/* Submit Button */}
         <button
           type="submit"
-          className="w-full bg-[#3d3ff3] hover:bg-[#2c2ed6] active:scale-[0.98] text-white text-sm font-semibold py-3.5 rounded-xl shadow-md shadow-indigo-600/10 transition-all duration-200 mt-2"
+          disabled={isLoading}
+          className="w-full bg-[#3d3ff3] hover:bg-[#2c2ed6] disabled:bg-slate-400 active:scale-[0.98] text-white text-sm font-semibold py-3.5 rounded-xl shadow-md shadow-indigo-600/10 transition-all duration-200 mt-2 cursor-pointer flex items-center justify-center"
         >
-          Masuk
+          {isLoading ? 'Sedang masuk...' : 'Masuk'}
         </button>
       </form>
 
       {/* Footer */}
-      <div className="mt-8 text-xs text-slate-500 flex items-center">
-        <span>Belum punya akun?</span>
-        <a
-          href="#register"
-          className="font-semibold text-[#b87c31] hover:text-[#9c6321] transition-colors ml-1"
-        >
-          Buat akun gratis
-        </a>
+      <div className="mt-5 text-xs text-slate-500 flex items-center">
+
       </div>
     </div>
   );

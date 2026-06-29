@@ -5,6 +5,7 @@ import path from 'node:path';
 
 import react from '@astrojs/react';
 import tailwind from '@tailwindcss/vite';
+import node from '@astrojs/node';
 
 function getPort() {
     try {
@@ -23,15 +24,38 @@ function getPort() {
     return process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
 }
 
+function getApiUrl() {
+    try {
+        const envPath = path.join(process.cwd(), '.env');
+        if (fs.existsSync(envPath)) {
+            const envContent = fs.readFileSync(envPath, 'utf-8');
+            const match = envContent.match(/^BASE_URL_SPRINT_DASH_API\s*=\s*(.+)/m);
+            if (match) {
+                return match[1].trim().replace(/['"]/g, '');
+            }
+        }
+    } catch (e) {
+        // ignore
+    }
+    return 'http://localhost:3000';
+}
+
 // https://astro.build/config
 export default defineConfig({
+    output: 'server',
+    adapter: node({
+        mode: 'standalone'
+    }),
     server: {
         port: getPort()
     },
 
     integrations: [react()],
     vite: {
-        plugins: [tailwind()]
+        plugins: [tailwind()],
+        define: {
+            'import.meta.env.BASE_URL_SPRINT_DASH_API': JSON.stringify(getApiUrl())
+        }
     },
     devToolbar: {
         enabled: false
