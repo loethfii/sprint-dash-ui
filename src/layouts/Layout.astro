@@ -15,7 +15,7 @@ import { ClientRouter } from 'astro:transitions';
 
 		<!-- Immediate Theme Initializer Script -->
 		<script is:inline>
-			(function () {
+			function applyTheme() {
 				var t = localStorage.getItem('sprint-dash-theme');
 				var isLight = t === 'light';
 				if (isLight) {
@@ -28,7 +28,9 @@ import { ClientRouter } from 'astro:transitions';
 					document.documentElement.style.backgroundColor = '#090a0f';
 				}
 				document.documentElement.style.colorScheme = isLight ? 'light' : 'dark';
-			})();
+			}
+			applyTheme();
+			document.addEventListener('astro:after-swap', applyTheme);
 		</script>
 
 		<title>Sprint Dash - Kanban Workspace</title>
