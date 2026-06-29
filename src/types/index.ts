@@ -40,9 +40,12 @@ export interface Project {
 }
 
 export interface Member {
-  id: number;
+  id: string | number;
   name: string;
+  username?: string;
   email: string;
+  phoneNumber?: string;
   role: string;
-  avatar: string;
+  avatar?: string;
+  password?: string;
 }

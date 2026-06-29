@@ -1,4 +1,4 @@
-import type { Project } from '../types';
+import type { Project, Member } from '../types';
 
 const API_BASE_URL = import.meta.env.BASE_URL_SPRINT_DASH_API;
 const API_BASE = `${API_BASE_URL}/api/v1`;
@@ -316,6 +316,87 @@ export async function deleteProject(id: string | number): Promise<ApiResponse<{ 
 
   if (!response.ok) {
     throw new Error('Failed to delete project');
+  }
+
+  return response.json();
+}
+
+export interface MemberPayload {
+  name: string;
+  username: string;
+  email: string;
+  phoneNumber: string;
+  role: string;
+  password?: string;
+}
+
+export async function fetchMembers(page = 1, limit = 10): Promise<ApiResponse<Member[]>> {
+  const token = cookies.get('accessToken');
+  const response = await fetch(`${API_BASE}/users?page=${page}&limit=${limit}`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData?.error || errData?.message || 'Failed to fetch members');
+  }
+
+  return response.json();
+}
+
+export async function createMember(payload: MemberPayload): Promise<ApiResponse<Member>> {
+  const token = cookies.get('accessToken');
+  const response = await fetch(`${API_BASE}/users`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData?.error || errData?.message || 'Failed to create member');
+  }
+
+  return response.json();
+}
+
+export async function updateMember(id: string | number, payload: MemberPayload): Promise<ApiResponse<Member>> {
+  const token = cookies.get('accessToken');
+  const response = await fetch(`${API_BASE}/users/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData?.error || errData?.message || 'Failed to update member');
+  }
+
+  return response.json();
+}
+
+export async function deleteMember(id: string | number): Promise<ApiResponse<{ message: string }>> {
+  const token = cookies.get('accessToken');
+  const response = await fetch(`${API_BASE}/users/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData?.error || errData?.message || 'Failed to delete member');
   }
 
   return response.json();

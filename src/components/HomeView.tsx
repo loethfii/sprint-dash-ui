@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Users, FolderKanban, CheckCircle2, TrendingUp } from 'lucide-react';
+import { getMeDecoded } from '../services/api';
 
 interface HomeViewProps {
   isDarkMode: boolean;
@@ -15,7 +16,10 @@ interface HomeViewProps {
 
 export default function HomeView({ membersCount, projectsCount, taskStats }: HomeViewProps) {
   const { openPct, workingPct, closedPct, totalTasks } = taskStats;
-
+  const [user, setUser] = useState('')
+  useEffect(() => {
+    setUser(getMeDecoded()?.name || '')
+  }, [])
   // Mock data points for SVG line chart (representing project velocity over the week)
   const linePoints = "0,80 40,65 80,75 120,40 160,50 200,20 240,30 280,10 320,15 360,5";
   const areaPoints = "0,80 40,65 80,75 120,40 160,50 200,20 240,30 280,10 320,15 360,5 360,100 0,100";
@@ -26,7 +30,7 @@ export default function HomeView({ membersCount, projectsCount, taskStats }: Hom
       <div className="p-6 rounded-2xl relative overflow-hidden transition-all border bg-linear-to-r from-indigo-50/50 via-slate-50 to-white dark:from-indigo-950/40 dark:via-slate-900/60 dark:to-slate-900 border-slate-200 dark:border-[#1f2130]">
         <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl"></div>
         <h2 className="text-lg font-bold text-slate-800 dark:text-white">
-          Welcome back, Azunyan!
+          Welcome back, {user}!
         </h2>
         <p className="text-xs text-slate-500 mt-1 max-w-xl">
           Here is your agile workspace report for today. Your team completed 2 main releases last week.
@@ -86,7 +90,7 @@ export default function HomeView({ membersCount, projectsCount, taskStats }: Hom
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* Project Velocity Area Chart */}
         <div className="p-6 rounded-2xl border lg:col-span-2 flex flex-col justify-between transition-all bg-white dark:bg-[#0f111a] border-slate-200 dark:border-[#1f2130] shadow-xs">
           <div className="flex items-center justify-between mb-4">
@@ -112,10 +116,10 @@ export default function HomeView({ membersCount, projectsCount, taskStats }: Hom
               <line x1="0" y1="25" x2="360" y2="25" className="stroke-slate-100 dark:stroke-[#1f2130]" strokeDasharray="3" />
               <line x1="0" y1="50" x2="360" y2="50" className="stroke-slate-100 dark:stroke-[#1f2130]" strokeDasharray="3" />
               <line x1="0" y1="75" x2="360" y2="75" className="stroke-slate-100 dark:stroke-[#1f2130]" strokeDasharray="3" />
-              
+
               {/* Fill Area */}
               <polygon points={areaPoints} fill="url(#chartGlow)" />
-              
+
               {/* Glowing Line */}
               <polyline points={linePoints} fill="none" stroke="#6366f1" strokeWidth="2.5" />
             </svg>
@@ -146,19 +150,19 @@ export default function HomeView({ membersCount, projectsCount, taskStats }: Hom
                 {/* Track */}
                 <circle cx="72" cy="72" r="56" fill="transparent" className="stroke-slate-100 dark:stroke-[#181a26]" strokeWidth="10" />
                 {/* Closed segment */}
-                <circle cx="72" cy="72" r="56" fill="transparent" stroke="#2ec4b6" strokeWidth="10" 
+                <circle cx="72" cy="72" r="56" fill="transparent" stroke="#2ec4b6" strokeWidth="10"
                   strokeDasharray={`${2 * Math.PI * 56}`}
                   strokeDashoffset={`${2 * Math.PI * 56 * (1 - closedPct / 100)}`}
                 />
                 {/* Working segment */}
                 <circle cx="72" cy="72" r="44" fill="transparent" className="stroke-slate-100 dark:stroke-[#181a26]" strokeWidth="10" />
-                <circle cx="72" cy="72" r="44" fill="transparent" stroke="#ff9f1c" strokeWidth="10" 
+                <circle cx="72" cy="72" r="44" fill="transparent" stroke="#ff9f1c" strokeWidth="10"
                   strokeDasharray={`${2 * Math.PI * 44}`}
                   strokeDashoffset={`${2 * Math.PI * 44 * (1 - workingPct / 100)}`}
                 />
                 {/* Open segment */}
                 <circle cx="72" cy="72" r="32" fill="transparent" className="stroke-slate-100 dark:stroke-[#181a26]" strokeWidth="10" />
-                <circle cx="72" cy="72" r="32" fill="transparent" stroke="#5f3afc" strokeWidth="10" 
+                <circle cx="72" cy="72" r="32" fill="transparent" stroke="#5f3afc" strokeWidth="10"
                   strokeDasharray={`${2 * Math.PI * 32}`}
                   strokeDashoffset={`${2 * Math.PI * 32 * (1 - openPct / 100)}`}
                 />
