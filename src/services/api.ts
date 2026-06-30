@@ -1,4 +1,4 @@
-import type { Project, Member } from '../types';
+import type { Project, Member, Task } from '../types';
 
 const API_BASE_URL = import.meta.env.BASE_URL_SPRINT_DASH_API;
 const API_BASE = `${API_BASE_URL}/api/v1`;
@@ -397,6 +397,178 @@ export async function deleteMember(id: string | number): Promise<ApiResponse<{ m
   if (!response.ok) {
     const errData = await response.json().catch(() => ({}));
     throw new Error(errData?.error || errData?.message || 'Failed to delete member');
+  }
+
+  return response.json();
+}
+
+export interface TaskPayload {
+  projectId: string;
+  parentTaskId?: string | null;
+  title: string;
+  description: string;
+  status: string;
+  startTime: string;
+  endTime: string;
+  priority: string;
+}
+
+export function mapBackendTaskToFrontend(task: any): Task {
+  return {
+    id: task.id,
+    title: task.title,
+    description: task.description || '',
+    status: task.status || 'open',
+    priority: task.priority || 'low',
+    startTime: task.startTime ? task.startTime.split('T')[0] : '',
+    endTime: task.endTime ? task.endTime.split('T')[0] : '',
+    parentTaskId: task.parentTaskId || null,
+    projectId: task.projectId,
+    assignees: task.taskAssignment && task.taskAssignment.user
+      ? [{
+          name: task.taskAssignment.user.name,
+          avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(task.taskAssignment.user.name)}`
+        }]
+      : [],
+    subtasks: task.child && Array.isArray(task.child)
+      ? task.child.map(mapBackendTaskToFrontend)
+      : [],
+    comments: task.comments || 0,
+    views: task.views || 0,
+    commentsData: task.commentsData || []
+  };
+}
+
+export async function fetchTasksTree(filters: {
+  projectId?: string;
+  assignedUser?: string;
+  priority?: string;
+  status?: string;
+}): Promise<ApiResponse<Task[]>> {
+  const token = cookies.get('accessToken');
+  const params = new URLSearchParams();
+  if (filters.projectId) params.append('projectId', filters.projectId);
+  if (filters.assignedUser) params.append('assignedUser', filters.assignedUser);
+  if (filters.priority) params.append('priority', filters.priority);
+  if (filters.status) params.append('status', filters.status);
+
+  const response = await fetch(`${API_BASE}/tasks/tree?${params.toString()}`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData?.error || errData?.message || 'Failed to fetch tasks tree');
+  }
+
+  const result = await response.json();
+  if (result.data && Array.isArray(result.data)) {
+    result.data = result.data.map(mapBackendTaskToFrontend);
+  }
+  return result;
+}
+
+export async function fetchTaskById(id: string | number): Promise<ApiResponse<Task>> {
+  const token = cookies.get('accessToken');
+  const response = await fetch(`${API_BASE}/tasks/${id}`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData?.error || errData?.message || 'Failed to fetch task');
+  }
+
+  const result = await response.json();
+  if (result.data) {
+    result.data = mapBackendTaskToFrontend(result.data);
+  }
+  return result;
+}
+
+export async function createTask(payload: Partial<TaskPayload>): Promise<ApiResponse<Task>> {
+  const token = cookies.get('accessToken');
+  const response = await fetch(`${API_BASE}/tasks`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData?.error || errData?.message || 'Failed to create task');
+  }
+
+  const result = await response.json();
+  if (result.data) {
+    result.data = mapBackendTaskToFrontend(result.data);
+  }
+  return result;
+}
+
+export async function updateTask(id: string | number, payload: Partial<TaskPayload>): Promise<ApiResponse<Task>> {
+  const token = cookies.get('accessToken');
+  const response = await fetch(`${API_BASE}/tasks/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData?.error || errData?.message || 'Failed to update task');
+  }
+
+  const result = await response.json();
+  if (result.data) {
+    result.data = mapBackendTaskToFrontend(result.data);
+  }
+  return result;
+}
+
+export async function deleteTask(id: string | number): Promise<ApiResponse<{ message: string }>> {
+  const token = cookies.get('accessToken');
+  const response = await fetch(`${API_BASE}/tasks/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData?.error || errData?.message || 'Failed to delete task');
+  }
+
+  return response.json();
+}
+
+export async function assignTask(taskId: string | number, userId: string): Promise<ApiResponse<any>> {
+  const token = cookies.get('accessToken');
+  const response = await fetch(`${API_BASE}/tasks/${taskId}/assign`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ userId }),
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData?.error || errData?.message || 'Failed to assign task');
   }
 
   return response.json();

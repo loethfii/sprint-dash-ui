@@ -16,8 +16,8 @@ interface TaskTreeColumnProps {
   status: Task['status'];
   tasks: Task[];
   onSelectTask: (task: Task) => void;
-  onAddTask: (status: Task['status'], parentId: number | null) => void;
-  onToggleStatus: (id: number, status: Task['status']) => void;
+  onAddTask: (status: Task['status'], parentId: string | number | null) => void;
+  onToggleStatus: (id: string | number, status: Task['status']) => void;
   isDarkMode?: boolean;
 }
 
@@ -101,8 +101,8 @@ interface TreeNodeProps {
   node: Task;
   level: number;
   onSelectTask: (task: Task) => void;
-  onAddTask: (status: Task['status'], parentId: number | null) => void;
-  onToggleStatus: (id: number, status: Task['status']) => void;
+  onAddTask: (status: Task['status'], parentId: string | number | null) => void;
+  onToggleStatus: (id: string | number, status: Task['status']) => void;
 }
 
 // Recursive Tree Node Component

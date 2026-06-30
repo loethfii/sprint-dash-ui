@@ -13,16 +13,18 @@ import {
   Send
 } from 'lucide-react';
 
-import type { Task, Comment } from '../types';
+import type { Task, Comment, Member } from '../types';
 
 interface TaskDetailModalProps {
   task: Task | null;
-  parentId: number | null;
+  parentId: string | number | null;
   status: Task['status'];
   isOpen: boolean;
   onClose: () => void;
-  onSave: (task: Task, parentId: number | null) => void;
-  onDelete: (id: number) => void;
+  onSave: (task: Task, parentId: string | number | null) => void;
+  onDelete: (id: string | number) => void;
+  members: Member[];
+  projectName: string;
 }
 
 export default function TaskDetailModal({ 
@@ -32,14 +34,17 @@ export default function TaskDetailModal({
   isOpen, 
   onClose, 
   onSave, 
-  onDelete 
+  onDelete,
+  members,
+  projectName
 }: TaskDetailModalProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<Task['priority']>('low');
   const [taskStatus, setTaskStatus] = useState<Task['status']>('open');
-  const [assigneeName, setAssigneeName] = useState('Azunyan U. Wu');
-  const [assigneeAvatar, setAssigneeAvatar] = useState('https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100&auto=format&fit=crop');
+  const [assigneeId, setAssigneeId] = useState<string | number>('');
+  const [assigneeName, setAssigneeName] = useState('Unassigned');
+  const [assigneeAvatar, setAssigneeAvatar] = useState('');
   const [subtasksList, setSubtasksList] = useState<Task[]>([]);
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
   const [commentsList, setCommentsList] = useState<Comment[]>([]);
@@ -54,8 +59,13 @@ export default function TaskDetailModal({
       setPriority(task.priority || 'low');
       setTaskStatus(task.status || 'open');
       if (task.assignees && task.assignees[0]) {
+        setAssigneeId(task.assignees[0].id || '');
         setAssigneeName(task.assignees[0].name);
-        setAssigneeAvatar(task.assignees[0].avatar);
+        setAssigneeAvatar(task.assignees[0].avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(task.assignees[0].name)}`);
+      } else {
+        setAssigneeId('');
+        setAssigneeName('Unassigned');
+        setAssigneeAvatar('');
       }
       setSubtasksList(task.subtasks || []);
       setCommentsList(task.commentsData || []);
@@ -66,8 +76,9 @@ export default function TaskDetailModal({
       setDescription('');
       setPriority('low');
       setTaskStatus(status || 'open');
-      setAssigneeName('Azunyan U. Wu');
-      setAssigneeAvatar('https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100&auto=format&fit=crop');
+      setAssigneeId('');
+      setAssigneeName('Unassigned');
+      setAssigneeAvatar('');
       setSubtasksList([]);
       setCommentsList([]);
       setStartTime('');
@@ -78,18 +89,21 @@ export default function TaskDetailModal({
   if (!isOpen) return null;
 
   const handleSave = () => {
-    if (!title.trim()) return;
+    if (!title.trim()) {
+      alert("Task title is required!");
+      return;
+    }
     onSave({
-      id: task ? task.id : Date.now(),
+      id: task ? task.id : '',
       title,
       description,
       priority,
       status: taskStatus,
-      assignees: [{ name: assigneeName, avatar: assigneeAvatar }],
+      assignees: assigneeId ? [{ id: assigneeId, name: assigneeName, avatar: assigneeAvatar }] : [],
       subtasks: subtasksList,
       comments: commentsList.length,
       commentsData: commentsList,
-      views: task ? task.views : Math.floor(Math.random() * 50) + 1,
+      views: task ? task.views : 0,
       startTime,
       endTime,
     }, parentId);
@@ -98,12 +112,12 @@ export default function TaskDetailModal({
   const handleAddSubtask = () => {
     if (!newSubtaskTitle.trim()) return;
     const newSub: Task = {
-      id: Date.now() + Math.random(),
+      id: '',
       title: newSubtaskTitle,
       description: '',
       status: 'open',
       priority: 'low',
-      assignees: [{ name: assigneeName, avatar: assigneeAvatar }],
+      assignees: assigneeId ? [{ id: assigneeId, name: assigneeName, avatar: assigneeAvatar }] : [],
       subtasks: [],
       comments: 0
     };
@@ -115,20 +129,14 @@ export default function TaskDetailModal({
     if (!newCommentText.trim()) return;
     const newComment: Comment = {
       id: Date.now(),
-      author: 'Azunyan U. Wu',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100&auto=format&fit=crop',
+      author: 'User',
+      avatar: `https://api.dicebear.com/7.x/initials/svg?seed=User`,
       text: newCommentText,
       time: 'Just now'
     };
     setCommentsList([...commentsList, newComment]);
     setNewCommentText('');
   };
-
-  const teamMembers = [
-    { name: 'Azunyan U. Wu', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100&auto=format&fit=crop' },
-    { name: 'Ronaldo S.', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=100&auto=format&fit=crop' },
-    { name: 'Lia Martinez', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100&auto=format&fit=crop' },
-  ];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in">
@@ -210,24 +218,32 @@ export default function TaskDetailModal({
                 <User className="w-3.5 h-3.5 text-emerald-400" /> Assignee
               </span>
               <div className="flex items-center gap-2">
-                <img 
-                  src={assigneeAvatar} 
-                  alt={assigneeName} 
-                  className="w-5.5 h-5.5 rounded-full object-cover border border-slate-700" 
-                />
+                {assigneeAvatar && (
+                  <img 
+                    src={assigneeAvatar} 
+                    alt={assigneeName} 
+                    className="w-5.5 h-5.5 rounded-full object-cover border border-slate-700" 
+                  />
+                )}
                 <select 
-                  value={assigneeName} 
+                  value={assigneeId} 
                   onChange={(e) => {
-                    const selected = teamMembers.find(t => t.name === e.target.value);
+                    const val = e.target.value;
+                    setAssigneeId(val);
+                    const selected = members.find(m => String(m.id) === String(val));
                     if (selected) {
                       setAssigneeName(selected.name);
-                      setAssigneeAvatar(selected.avatar);
+                      setAssigneeAvatar(selected.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(selected.name)}`);
+                    } else {
+                      setAssigneeName('Unassigned');
+                      setAssigneeAvatar('');
                     }
                   }}
                   className="bg-[#151720] border border-[#222535] rounded-lg px-2.5 py-1.5 text-slate-300 text-[11px] font-semibold outline-none cursor-pointer"
                 >
-                  {teamMembers.map(member => (
-                    <option key={member.name} value={member.name}>{member.name}</option>
+                  <option value="">Unassigned</option>
+                  {members.map(member => (
+                    <option key={member.id} value={member.id}>{member.name}</option>
                   ))}
                 </select>
               </div>
@@ -239,7 +255,7 @@ export default function TaskDetailModal({
                 <Layers className="w-3.5 h-3.5 text-rose-400" /> Project Scope
               </span>
               <span className="text-[11px] font-bold px-2.5 py-1.5 bg-[#20222f] border border-[#2e3146] rounded-lg text-slate-300">
-                Core UI Refactoring
+                {projectName || 'No Project Selected'}
               </span>
             </div>
 

@@ -1,4 +1,5 @@
 export interface Assignee {
+  id?: string | number;
   name: string;
   avatar: string;
 }
@@ -12,7 +13,7 @@ export interface Comment {
 }
 
 export interface Task {
-  id: number;
+  id: string | number;
   title: string;
   description: string;
   status: 'open' | 'working' | 'closed' | 'overdue';
@@ -24,6 +25,8 @@ export interface Task {
   subtasks?: Task[];
   startTime?: string;
   endTime?: string;
+  projectId?: string;
+  parentTaskId?: string | number | null;
 }
 
 export interface Project {
