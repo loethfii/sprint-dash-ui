@@ -17,7 +17,7 @@ export interface Task {
   title: string;
   description: string;
   status: 'open' | 'working' | 'closed' | 'overdue';
-  priority: 'high' | 'medium' | 'low' | 'info';
+  priority: 'high' | 'medium' | 'low';
   assignees: Assignee[];
   comments?: number;
   views?: number;

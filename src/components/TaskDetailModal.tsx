@@ -216,7 +216,6 @@ export default function TaskDetailModal({
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
-                <option value="info">Info</option>
               </select>
             </div>
 
