@@ -7,7 +7,8 @@ import {
   Settings,
   Search,
   LogOut,
-  Home
+  Home,
+  BriefcaseBusiness,
 } from 'lucide-react';
 import { getMe, getMeDecoded, logoutUser, type User } from '../services/api';
 
@@ -44,7 +45,8 @@ export default function Sidebar({ activeTab }: SidebarProps) {
     Users,
     BarChart3,
     Settings,
-    Home
+    Home,
+    BriefcaseBusiness
   };
 
 

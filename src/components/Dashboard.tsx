@@ -10,8 +10,10 @@ import {
   createTask, 
   updateTask, 
   deleteTask, 
-  assignTask 
+  assignTask,
+  mapFrontendTaskToPayload
 } from '../services/api';
+
 
 export default function Dashboard() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -103,14 +105,9 @@ export default function Dashboard() {
       let savedTask: Task;
       if (selectedTask) {
         // Edit mode
+        const payload = mapFrontendTaskToPayload(taskData, selectedProjectId);
         const res = await updateTask(selectedTask.id, {
-          title: taskData.title,
-          description: taskData.description,
-          status: taskData.status,
-          priority: taskData.priority,
-          startTime: taskData.startTime,
-          endTime: taskData.endTime,
-          projectId: selectedProjectId,
+          ...payload,
           parentTaskId: selectedTask.parentTaskId ? String(selectedTask.parentTaskId) : null,
         });
         savedTask = res.data;
@@ -123,14 +120,9 @@ export default function Dashboard() {
         }
       } else {
         // Add mode
+        const payload = mapFrontendTaskToPayload(taskData, selectedProjectId);
         const res = await createTask({
-          title: taskData.title,
-          description: taskData.description,
-          status: taskData.status,
-          priority: taskData.priority,
-          startTime: taskData.startTime,
-          endTime: taskData.endTime,
-          projectId: selectedProjectId,
+          ...payload,
           parentTaskId: parentId ? String(parentId) : null,
         });
         savedTask = res.data;

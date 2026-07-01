@@ -411,7 +411,26 @@ export interface TaskPayload {
   startTime: string;
   endTime: string;
   priority: string;
+  child?: TaskPayload[];
 }
+
+export function mapFrontendTaskToPayload(task: Task, defaultProjectId: string): TaskPayload {
+  const projectId = task.projectId || defaultProjectId;
+  return {
+    projectId,
+    parentTaskId: task.parentTaskId ? String(task.parentTaskId) : null,
+    title: task.title,
+    description: task.description || '',
+    status: task.status || 'open',
+    startTime: task.startTime || new Date().toISOString().split('T')[0],
+    endTime: task.endTime || new Date().toISOString().split('T')[0],
+    priority: task.priority || 'low',
+    child: task.subtasks && task.subtasks.length > 0
+      ? task.subtasks.map(sub => mapFrontendTaskToPayload(sub, projectId))
+      : undefined
+  };
+}
+
 
 export function mapBackendTaskToFrontend(task: any): Task {
   return {
