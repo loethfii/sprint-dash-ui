@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import { Bell, ChevronRight, HelpCircle, Plus, Sun, Moon } from 'lucide-react';
+import NotificationDropdown from './NotificationDropdown';
 
 interface DashboardShellProps {
   activeTab: string;
@@ -12,6 +13,8 @@ export default function DashboardShell({ activeTab, title, children }: Dashboard
   // We keep a simple client state to pass down for canvas/SVG elements if needed,
   // defaulting to true (dark) on the server to match initial render and updating in useEffect.
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('sprint-dash-theme');
@@ -63,10 +66,24 @@ export default function DashboardShell({ activeTab, title, children }: Dashboard
               <Sun className="w-4.5 h-4.5 hidden dark:block" />
               <Moon className="w-4.5 h-4.5 block dark:hidden" />
             </button>
-            <button className="p-2 border rounded-xl transition-colors cursor-pointer relative bg-slate-100 dark:bg-[#151720] border-slate-200 dark:border-[#232634] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-[#1a1c26]">
-              <Bell className="w-4.5 h-4.5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full ring-2 bg-indigo-600 dark:bg-indigo-500 ring-white dark:ring-[#0d0e12]"></span>
-            </button>
+            
+            <div className="relative">
+              <button
+                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                className="p-2 border rounded-xl transition-colors cursor-pointer relative bg-slate-100 dark:bg-[#151720] border-slate-200 dark:border-[#232634] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-[#1a1c26]"
+              >
+                <Bell className="w-4.5 h-4.5" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full ring-2 bg-indigo-600 dark:bg-indigo-500 ring-white dark:ring-[#0d0e12]"></span>
+                )}
+              </button>
+              <NotificationDropdown
+                isOpen={isNotificationsOpen}
+                onClose={() => setIsNotificationsOpen(false)}
+                onUnreadCountChange={setUnreadCount}
+              />
+            </div>
+
             <button className="p-2 border rounded-xl transition-colors cursor-pointer bg-slate-100 dark:bg-[#151720] border-slate-200 dark:border-[#232634] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-[#1a1c26]">
               <HelpCircle className="w-4.5 h-4.5" />
             </button>
@@ -87,3 +104,4 @@ export default function DashboardShell({ activeTab, title, children }: Dashboard
     </div>
   );
 }
+

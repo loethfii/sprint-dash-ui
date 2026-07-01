@@ -12,17 +12,39 @@ interface HomeViewProps {
     closedPct: number;
     totalTasks: number;
   };
+  projectVelocity: Record<string, number>;
+  taskStatusShare: Array<{
+    status: string;
+    count: number;
+    percentage: number;
+  }>;
 }
 
-export default function HomeView({ membersCount, projectsCount, taskStats }: HomeViewProps) {
+export default function HomeView({ membersCount, projectsCount, taskStats, projectVelocity, taskStatusShare }: HomeViewProps) {
   const { openPct, workingPct, closedPct, totalTasks } = taskStats;
   const [user, setUser] = useState('')
   useEffect(() => {
     setUser(getMeDecoded()?.name || '')
   }, [])
-  // Mock data points for SVG line chart (representing project velocity over the week)
-  const linePoints = "0,80 40,65 80,75 120,40 160,50 200,20 240,30 280,10 320,15 360,5";
-  const areaPoints = "0,80 40,65 80,75 120,40 160,50 200,20 240,30 280,10 320,15 360,5 360,100 0,100";
+
+  // Calculate dynamic data points for SVG line chart (representing project velocity over the week)
+  const velocityValues = [
+    projectVelocity?.Mon || 0,
+    projectVelocity?.Tue || 0,
+    projectVelocity?.Wed || 0,
+    projectVelocity?.Thu || 0,
+    projectVelocity?.Fri || 0,
+    projectVelocity?.Sat || 0,
+    projectVelocity?.Sun || 0,
+  ];
+  const maxVelocity = Math.max(...velocityValues, 1);
+  const points = velocityValues.map((val, index) => {
+    const x = (index * 360) / 6;
+    const y = 90 - (val / maxVelocity) * 80;
+    return { x, y };
+  });
+  const linePoints = points.map(p => `${p.x},${p.y}`).join(" ");
+  const areaPoints = `0,100 ${linePoints} 360,100`;
 
   return (
     <div className="flex-1 p-8 overflow-y-auto custom-scrollbar space-y-8 bg-[#f4f6f9] dark:bg-[#090a0f] text-slate-800 dark:text-slate-100 transition-colors duration-200">

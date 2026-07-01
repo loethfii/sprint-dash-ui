@@ -321,6 +321,62 @@ export async function deleteProject(id: string | number): Promise<ApiResponse<{ 
   return response.json();
 }
 
+export async function fetchManagers(page = 1, limit = 10): Promise<ApiResponse<Member[]>> {
+  const token = cookies.get('accessToken');
+  const response = await fetch(`${API_BASE}/users?page=${page}&limit=${limit}&role=manager`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData?.error || errData?.message || 'Failed to fetch managers');
+  }
+
+  return response.json();
+}
+
+export async function assignProjectManager(projectId: string | number, managerId: string): Promise<ApiResponse<any>> {
+  const token = cookies.get('accessToken');
+  const response = await fetch(`${API_BASE}/projects/${projectId}/assign`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ managerId }),
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData?.error || errData?.message || 'Failed to assign manager');
+  }
+
+  return response.json();
+}
+
+export async function unassignProjectManager(projectId: string | number, managerId: string): Promise<ApiResponse<any>> {
+  const token = cookies.get('accessToken');
+  const response = await fetch(`${API_BASE}/projects/${projectId}/assign/${managerId}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ managerId }),
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData?.error || errData?.message || 'Failed to unassign manager');
+  }
+
+  return response.json();
+}
+
+
 export interface MemberPayload {
   name: string;
   username: string;
@@ -445,6 +501,7 @@ export function mapBackendTaskToFrontend(task: any): Task {
     projectId: task.projectId,
     assignees: task.taskAssignment && task.taskAssignment.user
       ? [{
+          id: task.taskAssignment.user.id,
           name: task.taskAssignment.user.name,
           avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(task.taskAssignment.user.name)}`
         }]
@@ -592,3 +649,73 @@ export async function assignTask(taskId: string | number, userId: string): Promi
 
   return response.json();
 }
+
+export async function fetchDashboardWidgets(): Promise<ApiResponse<any>> {
+  const token = cookies.get('accessToken');
+  const response = await fetch(`${API_BASE}/widget/dashboard`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData?.error || errData?.message || 'Failed to fetch dashboard widgets');
+  }
+
+  return response.json();
+}
+
+export interface Notification {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  metadata: any | null;
+  taskId: string;
+  recipientId: string;
+  type: string;
+  status: 'pending' | 'read' | string;
+  sentAt: string | null;
+  task?: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    deletedAt: string | null;
+    metadata: any | null;
+    projectId: string;
+    scopeCategory: string | null;
+    parentTaskId: string | null;
+    title: string;
+    description: string;
+    status: string;
+    startTime: string;
+    endTime: string;
+    priority: string;
+    createdBy: string;
+  };
+  recipient?: User;
+}
+
+export async function fetchNotifications(page = 1, limit = 10): Promise<ApiResponse<Notification[]>> {
+  const token = cookies.get('accessToken');
+  if (!token) {
+    throw new Error('No access token found');
+  }
+
+  const response = await fetch(`${API_BASE}/notifications?page=${page}&limit=${limit}`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData?.error || errData?.message || 'Failed to fetch notifications');
+  }
+
+  return response.json();
+}
+

@@ -21,7 +21,7 @@ interface TaskDetailModalProps {
   status: Task['status'];
   isOpen: boolean;
   onClose: () => void;
-  onSave: (task: Task, parentId: string | number | null) => void;
+  onSave: (task: Task, parentId: string | number | null) => Promise<void> | void;
   onDelete: (id: string | number) => void;
   members: Member[];
   projectName: string;
@@ -51,6 +51,7 @@ export default function TaskDetailModal({
   const [newCommentText, setNewCommentText] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (task) {
@@ -88,25 +89,32 @@ export default function TaskDetailModal({
 
   if (!isOpen) return null;
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!title.trim()) {
       alert("Task title is required!");
       return;
     }
-    onSave({
-      id: task ? task.id : '',
-      title,
-      description,
-      priority,
-      status: taskStatus,
-      assignees: assigneeId ? [{ id: assigneeId, name: assigneeName, avatar: assigneeAvatar }] : [],
-      subtasks: subtasksList,
-      comments: commentsList.length,
-      commentsData: commentsList,
-      views: task ? task.views : 0,
-      startTime,
-      endTime,
-    }, parentId);
+    setIsSaving(true);
+    try {
+      await onSave({
+        id: task ? task.id : '',
+        title,
+        description,
+        priority,
+        status: taskStatus,
+        assignees: assigneeId ? [{ id: assigneeId, name: assigneeName, avatar: assigneeAvatar }] : [],
+        subtasks: subtasksList,
+        comments: commentsList.length,
+        commentsData: commentsList,
+        views: task ? task.views : 0,
+        startTime,
+        endTime,
+      }, parentId);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleAddSubtask = () => {
@@ -342,11 +350,20 @@ export default function TaskDetailModal({
             >
               Cancel
             </button>
-            <button
+             <button
               onClick={handleSave}
-              className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/15 transition-all active:scale-[0.98] cursor-pointer"
+              disabled={isSaving}
+              className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/15 transition-all active:scale-[0.98] disabled:scale-100 cursor-pointer disabled:cursor-not-allowed flex items-center justify-center min-w-28"
             >
-              Save Changes
+              {isSaving ? (
+                <div className="flex items-center gap-1.5">
+                  <svg className="animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Saving...</span>
+                </div>
+              ) : 'Save Changes'}
             </button>
           </div>
         </div>

@@ -29,6 +29,18 @@ export interface Task {
   parentTaskId?: string | number | null;
 }
 
+export interface ProjectAssignment {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  metadata: any;
+  projectId: string;
+  managerId: string;
+  assignedAt: string;
+  manager: Member;
+}
+
 export interface Project {
   id: string | number;
   name: string;
@@ -40,6 +52,7 @@ export interface Project {
   startDate?: string;
   endDate?: string;
   priority?: string;
+  projectAssignments?: ProjectAssignment[];
 }
 
 export interface Member {

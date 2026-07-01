@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import DashboardShell from './DashboardShell';
 import ProjectsView from './ProjectsView';
-import type { Project } from '../types';
-import { fetchProjects, createProject, updateProject, deleteProject } from '../services/api';
+import type { Project, Member } from '../types';
+import { fetchProjects, createProject, updateProject, deleteProject, fetchManagers, assignProjectManager, unassignProjectManager } from '../services/api';
 
 const getTodayStr = () => new Date().toISOString().split('T')[0];
 const getFutureStr = () => {
@@ -13,6 +13,7 @@ const getFutureStr = () => {
 
 export default function ProjectsViewPage() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [managers, setManagers] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -30,9 +31,40 @@ export default function ProjectsViewPage() {
     }
   };
 
+  const loadManagers = async () => {
+    try {
+      const res = await fetchManagers(1, 50);
+      setManagers(res.data || []);
+    } catch (err) {
+      console.error("Failed to load managers:", err);
+    }
+  };
+
   useEffect(() => {
     loadProjects();
+    loadManagers();
   }, []);
+
+  const handleAssignManager = async (projectId: string | number, managerId: string) => {
+    try {
+      await assignProjectManager(projectId, managerId);
+      await loadProjects();
+    } catch (err: any) {
+      console.error("Failed to assign manager:", err);
+      alert(err.message || 'Gagal menetapkan manajer.');
+    }
+  };
+
+  const handleUnassignManager = async (projectId: string | number, managerId: string) => {
+    try {
+      await unassignProjectManager(projectId, managerId);
+      await loadProjects();
+    } catch (err: any) {
+      console.error("Failed to unassign manager:", err);
+      alert(err.message || 'Gagal menghapus penugasan manajer.');
+    }
+  };
+
 
   const handleCreateProject = async (project: Project) => {
     try {
@@ -108,6 +140,9 @@ export default function ProjectsViewPage() {
               onCreateProject={handleCreateProject}
               onUpdateProject={handleUpdateProject}
               onDeleteProject={handleDeleteProject}
+              availableManagers={managers}
+              onAssignManager={handleAssignManager}
+              onUnassignManager={handleUnassignManager}
             />
           )}
         </div>

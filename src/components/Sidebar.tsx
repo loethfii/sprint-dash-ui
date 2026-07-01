@@ -28,6 +28,7 @@ const getInitials = (name: string): string => {
 
 export default function Sidebar({ activeTab }: SidebarProps) {
   const [user, setUser] = useState<User | null>(() => getMeDecoded());
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (!user) {
@@ -77,20 +78,30 @@ export default function Sidebar({ activeTab }: SidebarProps) {
       </div >
 
       {/* Search Bar */}
-      < div className="px-4 pt-6 pb-2" >
+      <div className="px-4 pt-6 pb-2">
         <div className="relative flex items-center border rounded-xl px-3 py-2 transition-all duration-200 bg-slate-50 dark:bg-[#151720] border-slate-200 dark:border-[#232634] focus-within:border-indigo-500/50 focus-within:ring-1 focus-within:ring-indigo-500/20">
           <Search className="w-4 h-4 text-slate-400 mr-2 shrink-0" />
           <input
             type="text"
             placeholder="Search dashboard..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="bg-transparent border-none outline-none text-xs w-full text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-600"
           />
         </div>
-      </div >
+      </div>
 
       {/* Navigation Links */}
       <div className="flex-1 py-4 overflow-y-auto custom-scrollbar flex flex-col gap-1 px-3">
-        {menuItems.map((item) => {
+        {user?.menu?.metadata && user.menu.metadata.map((item) => ({
+          id: item.id,
+          label: item.label,
+          icon: iconMap[item.icon] || Home,
+          path: item.path,
+          badge: item.badge
+        })).filter(item => 
+          item.label.toLowerCase().includes(searchQuery.toLowerCase())
+        ).map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
           return (
@@ -114,6 +125,19 @@ export default function Sidebar({ activeTab }: SidebarProps) {
             </a>
           );
         })}
+        {user?.menu?.metadata && user.menu.metadata.map((item) => ({
+          id: item.id,
+          label: item.label,
+          icon: iconMap[item.icon] || Home,
+          path: item.path,
+          badge: item.badge
+        })).filter(item => 
+          item.label.toLowerCase().includes(searchQuery.toLowerCase())
+        ).length === 0 && (
+          <div className="text-[11px] text-slate-400 dark:text-slate-500 text-center py-6">
+            No items found
+          </div>
+        )}
       </div>
 
       {/* User Profile */}

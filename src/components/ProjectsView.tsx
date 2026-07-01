@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, Edit3, FolderKanban, CheckSquare, Layers, Calendar } from 'lucide-react';
-import type { Project } from '../types';
+import type { Project, Member } from '../types';
 import ConfirmDeleteModal from './ConfirmDeleteModal';
 import moment from 'moment-timezone';
 
@@ -10,6 +10,9 @@ interface ProjectsViewProps {
   onCreateProject: (project: Project) => void;
   onUpdateProject: (id: string | number, fields: Partial<Project>) => void;
   onDeleteProject: (id: string | number) => void;
+  availableManagers: Member[];
+  onAssignManager: (projectId: string | number, managerId: string) => void;
+  onUnassignManager: (projectId: string | number, managerId: string) => void;
 }
 
 const getTodayStr = () => new Date().toISOString().split('T')[0];
@@ -34,7 +37,10 @@ export default function ProjectsView({
   projects,
   onCreateProject,
   onUpdateProject,
-  onDeleteProject
+  onDeleteProject,
+  availableManagers,
+  onAssignManager,
+  onUnassignManager
 }: ProjectsViewProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState<string | number | null>(null); // holds project ID being edited
@@ -338,6 +344,52 @@ export default function ProjectsView({
                         }`}>
                         {project.priority || 'medium'}
                       </span>
+                    </div>
+
+                    {/* Manager Section */}
+                    <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-dashed dark:border-[#1f2130]/50 border-slate-100">
+                      <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Manager</span>
+                      <div className="flex flex-wrap gap-1.5 items-center">
+                        {project.projectAssignments && project.projectAssignments.length > 0 ? (
+                          project.projectAssignments.map(pa => (
+                            <div key={pa.id} className="flex items-center gap-1 bg-slate-100 dark:bg-[#1a1c2a] border border-slate-200 dark:border-[#2e3146] rounded-lg px-2 py-0.5 text-[10px] text-slate-600 dark:text-slate-300">
+                              <span>{pa.manager?.name || 'Unknown'}</span>
+                              <button
+                                type="button"
+                                onClick={() => onUnassignManager(project.id, pa.managerId)}
+                                className="text-slate-400 hover:text-rose-400 font-bold transition-colors ml-1 cursor-pointer"
+                                title="Unassign Manager"
+                              >
+                                &times;
+                              </button>
+                            </div>
+                          ))
+                        ) : (
+                          <span className="text-[10px] text-slate-400 dark:text-slate-600 italic">No manager assigned</span>
+                        )}
+                        
+                        <div className="relative inline-block ml-auto">
+                          <select
+                            onChange={(e) => {
+                              if (e.target.value) {
+                                onAssignManager(project.id, e.target.value);
+                                e.target.value = '';
+                              }
+                            }}
+                            className="bg-transparent border-none text-[10px] text-indigo-400 font-semibold cursor-pointer outline-none hover:text-indigo-300"
+                            defaultValue=""
+                          >
+                            <option value="" disabled>+ Assign</option>
+                            {availableManagers
+                              .filter(m => !project.projectAssignments?.some(pa => pa.managerId === m.id))
+                              .map(m => (
+                                <option key={m.id} value={m.id} className="bg-[#0f111a] text-slate-300">
+                                  {m.name}
+                                </option>
+                              ))}
+                          </select>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
