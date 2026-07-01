@@ -50,18 +50,6 @@ export default function Sidebar({ activeTab }: SidebarProps) {
     BriefcaseBusiness
   };
 
-
-  const menuItems = user?.menu?.metadata
-    ? user.menu.metadata.map((item) => ({
-      id: item.id,
-      label: item.label,
-      icon: iconMap[item.icon] || Home,
-      path: item.path,
-      badge: item.badge
-    }))
-    : [
-    ];
-
   return (
     <aside className="w-64 border-r flex flex-col h-full select-none transition-colors duration-300 bg-white dark:bg-[#0d0e12] border-slate-200 dark:border-[#1f212a] text-slate-600 dark:text-slate-300" >
       {/* Header / Brand */}
@@ -99,7 +87,7 @@ export default function Sidebar({ activeTab }: SidebarProps) {
           icon: iconMap[item.icon] || Home,
           path: item.path,
           badge: item.badge
-        })).filter(item => 
+        })).filter(item =>
           item.label.toLowerCase().includes(searchQuery.toLowerCase())
         ).map((item) => {
           const Icon = item.icon;
@@ -131,13 +119,13 @@ export default function Sidebar({ activeTab }: SidebarProps) {
           icon: iconMap[item.icon] || Home,
           path: item.path,
           badge: item.badge
-        })).filter(item => 
+        })).filter(item =>
           item.label.toLowerCase().includes(searchQuery.toLowerCase())
         ).length === 0 && (
-          <div className="text-[11px] text-slate-400 dark:text-slate-500 text-center py-6">
-            No items found
-          </div>
-        )}
+            <div className="text-[11px] text-slate-400 dark:text-slate-500 text-center py-6">
+              No items found
+            </div>
+          )}
       </div>
 
       {/* User Profile */}

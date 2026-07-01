@@ -719,3 +719,33 @@ export async function fetchNotifications(page = 1, limit = 10): Promise<ApiRespo
   return response.json();
 }
 
+export interface ChangePasswordPayload {
+  oldPassword?: string;
+  password?: string;
+  confirmPassword?: string;
+}
+
+export async function changePassword(payload: ChangePasswordPayload): Promise<ApiResponse<any>> {
+  const token = cookies.get('accessToken');
+  if (!token) {
+    throw new Error('No access token found');
+  }
+
+  const response = await fetch(`${API_BASE}/users/change-password`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData?.error || errData?.message || 'Failed to change password');
+  }
+
+  return response.json();
+}
+
+
