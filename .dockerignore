@@ -1,0 +1,9 @@
+node_modules
+.git
+.github
+.astro
+dist
+npm-debug.log
+.env
+.env.*
+!.env.example
