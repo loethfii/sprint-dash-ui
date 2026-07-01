@@ -3,13 +3,13 @@ import DashboardShell from './DashboardShell';
 import TaskTreeColumn from './TaskTreeColumn';
 import TaskDetailModal from './TaskDetailModal';
 import type { Task, Project, Member } from '../types';
-import { 
-  fetchTasksTree, 
-  fetchProjects, 
-  fetchMembers, 
-  createTask, 
-  updateTask, 
-  deleteTask, 
+import {
+  fetchTasksTree,
+  fetchProjects,
+  fetchMembers,
+  createTask,
+  updateTask,
+  deleteTask,
   assignTask,
   mapFrontendTaskToPayload
 } from '../services/api';
@@ -45,7 +45,7 @@ export default function Dashboard() {
         if (projectsList.length > 0) {
           setSelectedProjectId(String(projectsList[0].id));
         }
-        
+
         const mRes = await fetchMembers();
         setMembers(mRes.data || []);
       } catch (err: any) {
@@ -172,7 +172,7 @@ export default function Dashboard() {
           {/* Sub-Header / Filters */}
           <div className="px-8 py-3.5 border-b flex flex-wrap gap-4 items-center justify-between shrink-0 transition-colors duration-200 border-slate-200 dark:border-[#1f212a] bg-white/80 dark:bg-[#0d0e12]/80">
             <div className="flex flex-wrap items-center gap-4 text-xs font-medium">
-              
+
               {/* Project Filter */}
               <div className="flex items-center gap-2">
                 <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Project:</span>
@@ -219,14 +219,13 @@ export default function Dashboard() {
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
                   <option value="high">High</option>
-                  <option value="info">Info</option>
                 </select>
               </div>
 
             </div>
-            
+
             <div className="flex items-center gap-2">
-              <button 
+              <button
                 onClick={() => loadTasks()}
                 className="px-3 py-1.5 border rounded-xl text-[11px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer bg-slate-100 dark:bg-[#151720]/80 border-slate-200 dark:border-[#232634] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-[#151720]"
               >

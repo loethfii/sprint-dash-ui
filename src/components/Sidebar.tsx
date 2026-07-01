@@ -105,11 +105,6 @@ export default function Sidebar({ activeTab }: SidebarProps) {
                 <Icon className={`w-4.5 h-4.5 transition-transform duration-300 group-hover:scale-110 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-indigo-500'}`} />
                 <span>{item.label}</span>
               </div>
-              {item.badge !== undefined && item.badge > 0 && (
-                <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold ${isActive ? 'bg-white/20 text-white' : 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400'}`}>
-                  {item.badge}
-                </span>
-              )}
             </a>
           );
         })}

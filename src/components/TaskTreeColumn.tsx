@@ -114,7 +114,6 @@ function TreeNode({ node, level, onSelectTask, onAddTask, onToggleStatus }: Tree
     high: 'bg-rose-500/10 text-rose-400 border border-rose-500/20',
     medium: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
     low: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
-    info: 'bg-sky-500/10 text-sky-400 border border-sky-500/20',
   };
 
   const getPriorityLabel = (priority: Task['priority']) => {
