@@ -34,7 +34,10 @@ Here is an overview of the directory structure:
 
 ```text
 sprint-dash-ui/
-├── public/                 # Static assets (images, icons, etc.)
+├── public/                 # Static assets
+│   ├── assets/             # Logo images (sprint-dash-logo.png, etc.)
+│   ├── favicon.ico
+│   └── favicon.svg
 ├── src/
 │   ├── assets/             # Project assets & media
 │   ├── components/         # React components (Dashboard, Sidebar, Tasks, Modals)
@@ -48,6 +51,7 @@ sprint-dash-ui/
 │   │   ├── TaskTreeColumn.tsx   # Interactive task list container
 │   │   └── TeamView.tsx
 │   ├── layouts/            # Core layout definitions
+│   │   └── Layout.astro    # Base HTML template layout
 │   ├── pages/              # Astro routing page entries
 │   │   ├── index.astro     # Home page
 │   │   ├── login.astro     # Login page
@@ -59,11 +63,15 @@ sprint-dash-ui/
 │   ├── services/           # Service & API layers
 │   │   └── api.ts          # REST client integration
 │   ├── styles/             # Global CSS & Tailwind utilities
-│   └── types/              # TypeScript typings
-│       └── index.ts        # Data structures (Task, Project, Assignee)
+│   │   └── global.css      # Core styles & styling variables
+│   ├── types/              # TypeScript typings
+│   │   └── index.ts        # Data structures (Task, Project, Assignee)
+│   └── middleware.ts       # Authentication & session middleware
 ├── astro.config.mjs        # Astro configuration file
 ├── Dockerfile              # Multi-stage production build configuration
 ├── docker-compose.yml      # Docker compose configuration
+├── .dockerignore           # Excluded files for docker context
+├── .env.example            # Example environment template
 └── package.json            # Dependencies and script definitions
 ```
 
