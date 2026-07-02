@@ -1,5 +1,6 @@
 {
   "name": "sprint-dash-ui",
+  "description": "Sprint Dash UI is a modern, premium web dashboard designed for managing agile sprints, tasks, and team collaborations. Built using **Astro**, **React**, and **Tailwind CSS**, it offers a fast, server-side rendered (SSR) dashboard interface with real-time-like interactions, dynamic tree layouts for subtasks, and robust API integration.",
   "type": "module",
   "version": "0.0.1",
   "engines": {

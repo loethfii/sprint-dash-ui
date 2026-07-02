@@ -149,3 +149,9 @@ All scripts can be run from the root of the project:
 | `npm run build` | Builds the production server and assets to the `./dist/` directory |
 | `npm run preview` | Previews the build output locally |
 | `npm run astro ...` | Invokes custom CLI commands like `astro check` or integration additions |
+
+---
+
+## 🎨 Inspiration & Credits
+
+The UI and layout design of this dashboard are inspired by the [Free Kanban Board App UI Kit](https://www.figma.com/design/MSR3PIs6go4Pwxhzu3Qv4S/3-Free-Kanban-Board-App-UI-Kit--Community-?node-id=6959-3467) Figma community template.
