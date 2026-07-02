@@ -2,6 +2,19 @@
 
 Sprint Dash UI is a modern, premium web dashboard designed for managing agile sprints, tasks, and team collaborations. Built using **Astro**, **React**, and **Tailwind CSS**, it offers a fast, server-side rendered (SSR) dashboard interface with real-time-like interactions, dynamic tree layouts for subtasks, and robust API integration.
 
+
+---
+
+## 🔑 Demo Credentials
+
+You can use the following pre-configured user credentials to log in and test different user roles:
+
+| Role | Email | Password |
+| :--- | :--- | :--- |
+| **Admin** | `admin@gmail.com` | `lS5px` |
+| **Manager** | `manager@gmail.com` | `HGTtD` |
+| **Staff** | `staff@gmail.com` | `YmIiB` |
+
 ---
 
 ## 🚀 Key Features
